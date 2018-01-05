@@ -35,7 +35,10 @@ namespace Abp.Auditing.Scopes
 
             _isDisposed = true;
 
-            throw new AbpException(DidNotCallCompleteMethodExceptionMessage);
+            if (!_isCompleteCalled)
+            {
+                throw new AbpException(DidNotCallCompleteMethodExceptionMessage);
+            }
         }
     }
 }
