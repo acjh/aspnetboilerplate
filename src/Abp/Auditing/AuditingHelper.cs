@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Abp.Collections.Extensions;
 using Abp.Dependency;
+using Abp.Domain.Entities;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Abp.Timing;
 using Castle.Core.Logging;
+using JetBrains.Annotations;
 
 namespace Abp.Auditing
 {
@@ -127,22 +129,46 @@ namespace Abp.Auditing
             return auditInfo;
         }
 
-        public void Save(AuditInfo auditInfo)
+        public IEntity<long> Save(AuditInfo auditInfo)
         {
+            IEntity<long> auditLog = null;
+
             using (var uow = _unitOfWorkManager.Begin(TransactionScopeOption.Suppress))
             {
-                AuditingStore.Save(auditInfo);
+                if (AuditingStore is IDatabaseAuditingStore auditingStore)
+                {
+                    auditLog = auditingStore.SaveAndGetEntity(auditInfo);
+                }
+                else
+                {
+                    AuditingStore.Save(auditInfo);
+                }
+                
                 uow.Complete();
             }
+
+            return auditLog;
         }
 
-        public async Task SaveAsync(AuditInfo auditInfo)
+        public async Task<IEntity<long>> SaveAsync(AuditInfo auditInfo)
         {
+            IEntity<long> auditLog = null;
+
             using (var uow = _unitOfWorkManager.Begin(TransactionScopeOption.Suppress))
             {
-                await AuditingStore.SaveAsync(auditInfo);
+                if (AuditingStore is IDatabaseAuditingStore auditingStore)
+                {
+                    auditLog = await auditingStore.SaveAndGetEntityAsync(auditInfo);
+                }
+                else
+                {
+                    await AuditingStore.SaveAsync(auditInfo);
+                }
+
                 await uow.CompleteAsync();
             }
+
+            return auditLog;
         }
 
         private string ConvertArgumentsToJson(IDictionary<string, object> arguments)

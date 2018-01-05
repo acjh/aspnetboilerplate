@@ -1,3 +1,5 @@
+using Abp.Domain.Entities;
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -13,8 +15,10 @@ namespace Abp.Auditing
 
         AuditInfo CreateAuditInfo(Type type, MethodInfo method, IDictionary<string, object> arguments);
 
-        void Save(AuditInfo auditInfo);
+        [CanBeNull]
+        IEntity<long> Save(AuditInfo auditInfo);
 
-        Task SaveAsync(AuditInfo auditInfo);
+        [CanBeNull]
+        Task<IEntity<long>> SaveAsync(AuditInfo auditInfo);
     }
 }
