@@ -15,15 +15,9 @@ namespace Abp.Auditing.Scopes
         private volatile bool _isCompleteCalled;
         private volatile bool _isDisposed;
 
-        public void Complete(long auditLogId)
+        public void Complete(long? auditLogId)
         {
             _isCompleteCalled = true;
-        }
-
-        public Task CompleteAsync(long auditLogId)
-        {
-            _isCompleteCalled = true;
-            return Task.FromResult(0);
         }
 
         public void Dispose()

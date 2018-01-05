@@ -37,9 +37,14 @@ namespace Abp.Auditing.Scopes
         }
 
         /// <inheritdoc/>
-        public void Complete(long auditLogId)
+        public void Complete(long? auditLogId)
         {
-            Completed.InvokeSafely(this, new AuditScopeEventArgs(auditLogId));
+            if (auditLogId == null)
+            {
+                return;
+            }
+
+            Completed.InvokeSafely(this, new AuditScopeEventArgs(auditLogId.Value));
         }
 
         /// <inheritdoc/>

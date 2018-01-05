@@ -12,6 +12,6 @@ namespace Abp.Auditing.Scopes
         /// <summary>
         /// Completes this audit scope.
         /// </summary>
-        void Complete(long auditLogId);
+        void Complete(long? auditLogId);
     }
 }
