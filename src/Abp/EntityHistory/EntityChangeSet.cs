@@ -30,6 +30,8 @@ namespace Abp.EntityHistory
         /// </summary>
         public const int MaxReasonLength = 256;
 
+        public long? AuditLogId { get; set; }
+
         /// <summary>
         /// Browser information if this entity is changed in a web request.
         /// </summary>
