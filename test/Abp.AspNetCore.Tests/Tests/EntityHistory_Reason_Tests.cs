@@ -2,6 +2,7 @@
 using Abp.Dependency;
 using Abp.EntityHistory;
 using Shouldly;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Abp.AspNetCore.Tests
@@ -33,6 +34,12 @@ namespace Abp.AspNetCore.Tests
         public void Should_Intercept_UseCase_Marked_Classes()
         {
             _useCaseMarkedClass.NonUseCaseMarkedMethod();
+        }
+
+        [Fact]
+        public async Task Should_Intercept_UseCase_Marked_Classes_Async()
+        {
+            await _useCaseMarkedClass.NonUseCaseMarkedMethodAsync();
         }
 
         [Fact]
@@ -87,6 +94,12 @@ namespace Abp.AspNetCore.Tests
         public virtual void NonUseCaseMarkedMethod()
         {
             ReasonProvider.Reason.ShouldBe(Consts.UseCaseDescription);
+        }
+
+        public virtual Task NonUseCaseMarkedMethodAsync()
+        {
+            ReasonProvider.Reason.ShouldBe(Consts.UseCaseDescription);
+            return Task.CompletedTask;
         }
     }
 }
