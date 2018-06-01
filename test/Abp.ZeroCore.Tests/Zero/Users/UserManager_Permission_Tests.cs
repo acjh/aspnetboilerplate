@@ -6,8 +6,10 @@ using Xunit;
 using System.Linq;
 using Abp.Authorization.Users;
 using Abp.Configuration.Startup;
+using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.ZeroCore.SampleApp.Application;
+using Abp.ZeroCore.SampleApp.EntityFramework;
 
 namespace Abp.Zero.Users
 {
@@ -15,15 +17,19 @@ namespace Abp.Zero.Users
     {
         private readonly IPermissionChecker _permissionChecker;
         private readonly IPermissionManager _permissionManager;
+        private readonly IRepository<UserPermission> _permissionRepo;
         private readonly UserManager _userManager;
+        private readonly IRepository<User, long> _userRepo;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
 
         public UserManager_Permission_Tests()
         {
             _permissionChecker = Resolve<IPermissionChecker>();
             _permissionManager = Resolve<IPermissionManager>();
+            _permissionRepo = Resolve<IRepository<UserPermission>>();
             _unitOfWorkManager = Resolve<IUnitOfWorkManager>();
             _userManager = Resolve<UserManager>();
+            _userRepo = Resolve<IRepository<User, long>>();
         }
 
         [Fact]
@@ -53,6 +59,42 @@ namespace Abp.Zero.Users
                     isGranted.ShouldBe(true);
                 }
             }
+        }
+
+        [Fact]
+        public void Test()
+        {
+            using (var uow = _unitOfWorkManager.Begin())
+            {
+                _permissionRepo.Insert(new UserPermission
+                {
+                    UserId = 2,
+                    Permission = "admin"
+                });
+
+                uow.Complete();
+            }
+
+            using (var uow = _unitOfWorkManager.Begin())
+            {
+                var perm = _permissionRepo.GetAll().First(p => p.UserId == 2 && p.Permission == "admin");
+
+                _permissionRepo.Delete(perm);  // let's say perm.Id == 3
+
+                var permissionsBefore = _permissionRepo.GetAll().ToList();  //permission(3) exists (yes)
+                permissionsBefore.ShouldContain(p => p.Id == perm.Id);      //permission(3) exists
+                var userBefore = _userRepo.GetAllIncluding(u => u.Permissions).First(u => u.Id == 2);  //permission(3) doesn't exist in userBefore.Permissions (yes)
+                userBefore.Permissions.ShouldNotContain(p => p.Id == perm.Id);                         //permission(3) doesn't exist in userBefore.Permissions
+
+                _unitOfWorkManager.Current.SaveChanges();
+
+                var permissionsAfter = _permissionRepo.GetAll().ToList();  //permission(3) disappears (yes)
+                permissionsAfter.ShouldNotContain(p => p.Id == perm.Id);   //permission(3) disappears
+                var userAfter = _userRepo.GetAllIncluding(u => u.Permissions).First(u => u.Id == 2);  //permission(3) appears again in userAfter.Permissions (no)
+                userAfter.Permissions.ShouldNotContain(p => p.Id == perm.Id);                         //permission(3) doesn't exist in userAfter.Permissions
+
+                uow.Complete();
+            };
         }
     }
 }

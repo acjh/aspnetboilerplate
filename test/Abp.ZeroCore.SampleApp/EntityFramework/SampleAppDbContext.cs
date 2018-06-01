@@ -1,4 +1,5 @@
-﻿using Abp.IdentityServer4;
+﻿using Abp.Domain.Entities;
+using Abp.IdentityServer4;
 using Abp.Zero.EntityFrameworkCore;
 using Abp.ZeroCore.SampleApp.Core;
 using Abp.ZeroCore.SampleApp.Core.EntityHistory;
@@ -7,6 +8,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Abp.ZeroCore.SampleApp.EntityFramework
 {
+    public class UserPermission : Entity, ISoftDelete
+    {
+        public int UserId { get; set; }
+        public string Permission { get; set; }
+        public bool IsDeleted { get; set; }
+    }
+
     //TODO: Re-enable when IdentityServer ready
     public class SampleAppDbContext : AbpZeroDbContext<Tenant, Role, User, SampleAppDbContext>, IAbpPersistedGrantDbContext
     {
@@ -22,6 +30,7 @@ namespace Abp.ZeroCore.SampleApp.EntityFramework
 
         public DbSet<Comment> Comments { get; set; }
 
+        public DbSet<UserPermission> UserPermissionss { get; set; }
 
         public SampleAppDbContext(DbContextOptions<SampleAppDbContext> options) 
             : base(options)
