@@ -264,14 +264,14 @@ namespace Abp.EntityHistory
                 return false;
             }
 
-            if (entityType.GetTypeInfo().IsDefined(typeof(AuditedAttribute), true))
-            {
-                return true;
-            }
-
             if (entityType.GetTypeInfo().IsDefined(typeof(DisableAuditingAttribute), true))
             {
                 return false;
+            }
+
+            if (entityType.GetTypeInfo().IsDefined(typeof(AuditedAttribute), true))
+            {
+                return true;
             }
 
             if (_configuration.Selectors.Any(selector => selector.Predicate(entityType)))
@@ -279,13 +279,13 @@ namespace Abp.EntityHistory
                 return true;
             }
 
-            var properties = entityEntry.Metadata.GetProperties();
-            if (properties.Any(p => p.PropertyInfo?.IsDefined(typeof(AuditedAttribute)) ?? false))
-            {
-                return true;
-            }
-
             return defaultValue;
+        }
+        
+        private bool HasAuditedProperties(EntityEntry entityEntry)
+        {
+            var properties = entityEntry.Metadata.GetProperties();
+            return properties.Any(p => p.PropertyInfo?.IsDefined(typeof(AuditedAttribute)) ?? false);
         }
 
         private bool ShouldSavePropertyHistory(PropertyEntry propertyEntry, bool defaultValue)
