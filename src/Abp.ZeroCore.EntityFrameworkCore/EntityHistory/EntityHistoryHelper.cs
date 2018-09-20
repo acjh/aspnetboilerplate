@@ -304,6 +304,7 @@ namespace Abp.EntityHistory
             var entityType = propertyEntry.EntityEntry.Entity.GetType();
             if (entityType.GetTypeInfo().IsDefined(typeof(DisableAuditingAttribute), true))
             {
+                // Don't save property history if property is not audited
                 if (propertyInfo == null || !propertyInfo.IsDefined(typeof(AuditedAttribute), true))
                 {
                     return false;
