@@ -50,6 +50,14 @@ namespace Abp.ZeroCore.SampleApp.EntityFramework
             modelBuilder.Entity<Book>().Property(e => e.Id).ValueGeneratedNever();
 
             modelBuilder.Entity<Store>().Property(e => e.Id).HasColumnName("StoreId");
+
+            var builder = modelBuilder.Entity<BranchUser>();
+            builder.ToTable("BranchUsers");
+            builder.HasKey(user => new { user.UserId, user.BranchId });
+            builder.Property(branchUser => branchUser.BranchId).IsRequired();
+
+            var navigation = builder.Metadata.FindNavigation(nameof(Blog.BranchUsers));
+            navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }
