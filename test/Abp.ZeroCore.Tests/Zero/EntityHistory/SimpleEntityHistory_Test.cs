@@ -199,6 +199,11 @@ namespace Abp.Zero.EntityHistory
             {
                 var blog1 = _blogRepository.Single(b => b.Name == "test-blog-1");
                 blog1Id = blog1.Id;
+                blog1.AssignUsersToBranch(new List<BranchUser>
+                {
+                    new BranchUser(blog1Id, 1, "admin")
+                });
+                _blogRepository.Update(blog1);
 
                 var branchUser = blog1.BranchUsers.First();
                 originalValue = branchUser.Name;
