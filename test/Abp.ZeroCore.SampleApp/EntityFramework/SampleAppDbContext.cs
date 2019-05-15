@@ -56,7 +56,6 @@ namespace Abp.ZeroCore.SampleApp.EntityFramework
             builder.HasKey(user => new { user.UserId, user.BranchId });
             builder.Property(branchUser => branchUser.BranchId).IsRequired();
 
-
             var navigation = modelBuilder.Entity<Blog>().Metadata.FindNavigation(nameof(Blog.BranchUsers));
             navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
         }
