@@ -26,7 +26,7 @@ namespace Abp.ZeroCore.SampleApp.Core.EntityHistory
 
         public Blog()
         {
-            
+            _branchUsers = new List<BranchUser>();
         }
 
         public Blog(string name, string url, string bloggerName)
@@ -58,6 +58,16 @@ namespace Abp.ZeroCore.SampleApp.Core.EntityHistory
             var oldUrl = Url;
             Url = url;
         }
+        public void AssignUsersToBranch(IList<BranchUser> branchUsers)
+        {
+            foreach (var user in branchUsers)
+            {
+                if (!_branchUsers.Contains(user))
+                {
+                    _branchUsers.Add(user);
+                }
+            }
+        }
     }
 
     public class BlogEx
@@ -67,6 +77,12 @@ namespace Abp.ZeroCore.SampleApp.Core.EntityHistory
 
     public class BranchUser : ValueObject<BranchUser>
     {
+        public BranchUser(int branchId, long userId, string name)
+        {
+            BranchId = branchId;
+            UserId = userId;
+            Name = name;
+        }
         public int BranchId { get; set; }
 
         public long UserId { get; set; }
