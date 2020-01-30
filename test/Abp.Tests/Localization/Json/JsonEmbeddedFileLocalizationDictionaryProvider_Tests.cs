@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Reflection;
+using Abp.Localization.Dictionaries;
 using Abp.Localization.Dictionaries.Json;
 using Abp.Reflection.Extensions;
 using Shouldly;
@@ -37,6 +39,38 @@ namespace Abp.Tests.Localization.Json
             zhHansDict.ShouldNotBe(null);
             zhHansDict["Apple"].ShouldBe("苹果");
             zhHansDict["Banana"].ShouldBe("香蕉");
+        }
+
+        [Fact]
+        public void Should_Get_Dictionaries_Rebuilded()
+        {
+            var dictionaryProvider = new CustomLocalizationProvider();
+            var localizationSource = new DictionaryBasedLocalizationSource("name", dictionaryProvider);
+            dictionaryProvider.InitializeDictionaries(); 
+            var allStrings = localizationSource.GetAllStrings();
+            dictionaryProvider.InitializeDictionaries();
+            var allStrings2 = localizationSource.GetAllStrings();
+            allStrings2.ShouldNotBe(allStrings);
+        }
+    }
+
+    public class CustomLocalizationProvider : LocalizationDictionaryProviderBase
+    {
+        protected int IterationNo = 0;
+
+        public new void InitializeDictionaries()
+        {
+            Dictionaries.Clear();
+
+            IterationNo += 1;
+
+            var deDict = new LocalizationDictionary(new CultureInfo("de-DE"));
+            deDict["HelloWorld"] = $"Hallo Welt Nummer {IterationNo}";
+            Dictionaries.Add("de-DE", deDict);
+
+            var enDict = new LocalizationDictionary(new CultureInfo("en"));
+            enDict["HelloWorld"] = $"Hello World number {IterationNo}";
+            Dictionaries.Add("en", enDict);
         }
     }
 }
