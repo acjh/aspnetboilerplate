@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Linq;
-using System.Reflection;
+using Abp.Configuration.Startup;
+using Abp.Dependency;
 using Abp.Localization.Dictionaries;
 using Abp.Localization.Dictionaries.Json;
 using Abp.Reflection.Extensions;
@@ -44,11 +45,12 @@ namespace Abp.Tests.Localization.Json
         [Fact]
         public void Should_Get_Dictionaries_Rebuilded()
         {
+            var localizationConfiguration = new LocalizationConfiguration();
             var dictionaryProvider = new CustomLocalizationProvider();
             var localizationSource = new DictionaryBasedLocalizationSource("name", dictionaryProvider);
-            dictionaryProvider.InitializeDictionaries(); 
+            localizationSource.Initialize(localizationConfiguration, IocManager.Instance);
             var allStrings = localizationSource.GetAllStrings();
-            dictionaryProvider.InitializeDictionaries();
+            localizationSource.Initialize(localizationConfiguration, IocManager.Instance);
             var allStrings2 = localizationSource.GetAllStrings();
             allStrings2.ShouldNotBe(allStrings);
         }
@@ -58,7 +60,7 @@ namespace Abp.Tests.Localization.Json
     {
         protected int IterationNo = 0;
 
-        public new void InitializeDictionaries()
+        protected override void InitializeDictionaries()
         {
             Dictionaries.Clear();
 
