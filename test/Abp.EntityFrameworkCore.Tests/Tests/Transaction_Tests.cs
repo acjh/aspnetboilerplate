@@ -36,7 +36,6 @@ namespace Abp.EntityFrameworkCore.Tests.Tests
                         );
 
                     throw new Exception(exceptionMessage); //Rollbacks transaction.
-                    await uow.CompleteAsync();
                 }
             }
             catch (Exception ex) when (ex.Message == exceptionMessage)
