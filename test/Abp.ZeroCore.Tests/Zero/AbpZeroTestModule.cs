@@ -19,7 +19,6 @@ namespace Abp.Zero
 
         public override void PreInitialize()
         {
-            Configuration.Modules.AbpAutoMapper().UseStaticMapper = false;
             Configuration.BackgroundJobs.IsJobExecutionEnabled = false;
             Configuration.Modules.Zero().LanguageManagement.EnableDbLocalization();
             Configuration.UnitOfWork.IsTransactional = false;

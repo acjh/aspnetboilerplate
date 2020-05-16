@@ -10,8 +10,6 @@ namespace Abp.TestBase.SampleApplication.Tests
     {
         public override void PreInitialize()
         {
-            Configuration.Modules.AbpAutoMapper().UseStaticMapper = false;
-
             Configuration.UnitOfWork.ConventionalUowSelectors.Add(type => type == typeof(MyCustomUowClass));
         }
 
