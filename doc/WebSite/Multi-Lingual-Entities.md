@@ -88,8 +88,6 @@ In some cases like editing a multi lingual entity on the UI, all translations ma
 	    public List<ProductTranslationDto> Translations {get; set;}
 	}
 
-
-
 	[AutoMap(typeof(ProductTranslation))]
 	public class ProductTranslationDto
 	{
@@ -109,7 +107,7 @@ configuration.CreateMultiLingualMap<Order, OrderTranslation, OrderListDto>(conte
 
 ### Crud Operations
 
-#### Creating a MultiLingual Entity with Translation(s) 
+#### Creating a Multi-Lingual Entity with Translation(s)
 
 A Dto class like the below one can be used for creating a Multi-Lingual entity with it's translations.
 
@@ -141,6 +139,23 @@ After defining such a Dto class, we can use it in our application service to cre
 	    }
 	}
 
+#### Reading a Multi-Lingual Entity with Translation(s)
+
+We can get a Multi-Lingual Entity 
+
+```c#
+public async Task<ProductListDto> GetProduct(int id)
+{
+    var product = await _productRepository.GetAllIncluding(p => p.Translations) 
+        .FirstOrDefaultAsync(p => p.Id == id);
+
+    var productDto = ObjectMapper.Map<ProductListDto>(product);
+    // productDto.Name is already translated
+
+    return productDto;
+}
+```
+
 #### Updating a Multi-Lingual Entity with Translation(s)
 
 We can use similar Dto class for updating our Multi-Lingual entity. A sample application service method for update operation can be defined like below;
@@ -166,4 +181,3 @@ For EntityFramework 6.x, all the translations must be deleted from database manu
 	    await _productTranslationRepository.DeleteAsync(translation);
 	    product.Translations.Remove(translation);
 	}
-
