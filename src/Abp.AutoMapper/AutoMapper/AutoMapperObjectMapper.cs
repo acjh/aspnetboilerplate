@@ -15,7 +15,7 @@ namespace Abp.AutoMapper
 
         public TDestination Map<TDestination>(object source)
         {
-            return Mapper.Map<TDestination>(source);
+            return Mapper.Map<TDestination>(source, opts => { });
         }
 
         public TDestination Map<TSource, TDestination>(TSource source, TDestination destination)

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Abp.Localization;
+using Abp.TestBase;
 using AutoMapper;
 using AutoMapper.EquivalencyExpression;
 using Shouldly;
@@ -7,7 +9,7 @@ using Xunit;
 
 namespace Abp.AutoMapper.Tests
 {
-    public class AutoMapping_Tests
+    public class AutoMapping_Tests : AbpIntegratedTestBase<AbpAutoMapperTestModule>
     {
         private readonly IMapper _mapper;
 
@@ -17,6 +19,7 @@ namespace Abp.AutoMapper.Tests
             {
                 configuration.CreateAutoAttributeMaps(typeof(MyClass1));
                 configuration.CreateAutoAttributeMaps(typeof(MyClass2));
+                configuration.CreateAutoAttributeMaps(typeof(MyClass4));
                 configuration.CreateAutoAttributeMaps(typeof(MyAutoMapKeyClass1));
                 configuration.CreateAutoAttributeMaps(typeof(MyAutoMapKeyClass2));
                 configuration.AddCollectionMappers();
@@ -31,6 +34,20 @@ namespace Abp.AutoMapper.Tests
             MyClass1 obj1 = null;
             var obj2 = _mapper.Map<MyClass2>(obj1);
             obj2.ShouldBe(null);
+        }
+
+        [Fact]
+        public void Map_LocalizableString()
+        {
+            var obj1 = new MyClass4
+            {
+                DisplayName = new LocalizableString("DisplayName", "Abp"),
+                Description = new LocalizableString("Description", "Abp"),
+            };
+            var objectMapper = LocalIocManager.Resolve<ObjectMapping.IObjectMapper>();
+            var obj2 = objectMapper.Map<MyClass5>(obj1);
+            obj2.DisplayName.ShouldBeNull();
+            obj2.Description.ShouldBeNull();
         }
 
         [Fact]
@@ -204,6 +221,21 @@ namespace Abp.AutoMapper.Tests
 
             [IgnoreMap]
             public int AnotherValue { get; set; }
+        }
+
+        [AutoMapTo(typeof(MyClass5))]
+        private class MyClass4
+        {
+            public ILocalizableString DisplayName { get; set; }
+
+            public ILocalizableString Description { get; set; }
+        }
+
+        private class MyClass5
+        {
+            public string DisplayName { get; set; }
+
+            public string Description { get; set; }
         }
 
         [AutoMapTo(typeof(MyAutoMapKeyClass2))]

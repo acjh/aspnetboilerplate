@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Abp.Configuration.Startup;
+using Abp.Dependency;
 using Abp.Localization;
+using Abp.Localization.Sources;
 using Abp.Modules;
 using Abp.Reflection;
 using AutoMapper;
@@ -80,8 +83,49 @@ namespace Abp.AutoMapper
         {
             var localizationContext = IocManager.Resolve<ILocalizationContext>();
 
-            configuration.CreateMap<ILocalizableString, string>().ConvertUsing(ls => ls == null ? null : ls.Localize(localizationContext));
-            configuration.CreateMap<LocalizableString, string>().ConvertUsing(ls => ls == null ? null : localizationContext.LocalizationManager.GetString(ls));
+            configuration.CreateMap<ILocalizableString, string>().ConvertUsing((ils, s, context) =>
+            {
+                if (ils.GetType() == typeof(LocalizableString))
+                {
+                    var ls = (LocalizableString)ils;
+                    var source = GetSource(context.Items, ls.SourceName, localizationContext.LocalizationManager);
+                    return source.GetString(ls.Name);
+                }
+
+                return ils.Localize(localizationContext);
+            });
+
+            configuration.CreateMap<LocalizableString, string>().ConvertUsing((ls, s, context) =>
+            {
+                var source = GetSource(context.Items, ls.SourceName, localizationContext.LocalizationManager);
+                return source.GetString(ls.Name);
+            });
+        }
+
+        private ILocalizationSource GetSource(IDictionary<string, object> items, string sourceName, ILocalizationManager localizationManager)
+        {
+            var tmp = localizationManager.GetAllSources();
+
+            IDictionary<string, ILocalizationSource> sources;
+            ILocalizationSource source;
+
+            if (items.TryGetValue("LocalizationSources", out object o))
+            {
+                sources = (IDictionary<string, ILocalizationSource>)o;
+                if (sources.TryGetValue(sourceName, out source))
+                {
+                    return source;
+                }
+            }
+            else
+            {
+                sources = new Dictionary<string, ILocalizationSource>();
+                items["LocalizationSources"] = sources;
+            }
+
+            source = localizationManager.GetSource(sourceName);
+            sources[sourceName] = source;
+            return source;
         }
     }
 }
